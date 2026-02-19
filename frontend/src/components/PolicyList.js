@@ -25,6 +25,7 @@ export default function PolicyList() {
     const [policies, setPolicies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [closingSoon, setClosingSoon] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [filters, setFilters] = useState({
@@ -53,6 +54,16 @@ export default function PolicyList() {
     const filtered = useMemo(() => {
         let result = policies;
 
+        // 마감임박 필터 (2주 이내)
+        if (closingSoon) {
+            const now = new Date();
+            const twoWeeksLater = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+            result = result.filter(p => {
+                const end = new Date(p.endDate || p.end_date);
+                return end >= now && end <= twoWeeksLater;
+            });
+        }
+
         // 카테고리 필터
         if (selectedCategory !== 'all') {
             result = result.filter(p => p.category === selectedCategory);
@@ -74,12 +85,14 @@ export default function PolicyList() {
         }
 
         return result;
-    }, [policies, selectedCategory, selectedStatus, search]);
+    }, [policies, closingSoon, selectedCategory, selectedStatus, search]);
 
     return (
         <div className="min-h-screen bg-md-surface">
             <Header
                 onSearch={setSearch}
+                closingSoon={closingSoon}
+                onClosingSoon={() => setClosingSoon(v => !v)}
             />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">

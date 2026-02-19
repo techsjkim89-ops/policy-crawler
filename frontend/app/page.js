@@ -19,6 +19,7 @@ export default function HomePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [search, setSearch] = useState('');
+    const [closingSoon, setClosingSoon] = useState(false);
 
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [viewMode, setViewMode] = useState('table');
@@ -86,6 +87,15 @@ export default function HomePage() {
 
     const filteredPolicies = useMemo(() => {
         let result = [...policies];
+        // 마감임박 필터 (2주 이내)
+        if (closingSoon) {
+            const now = new Date();
+            const twoWeeksLater = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+            result = result.filter(p => {
+                const end = new Date(p.endDate || p.end_date);
+                return end >= now && end <= twoWeeksLater;
+            });
+        }
         if (selectedCategories.length > 0) {
             result = result.filter(p => selectedCategories.includes(p.category));
         }
@@ -120,11 +130,11 @@ export default function HomePage() {
         });
 
         return result;
-    }, [policies, selectedCategories, filters.status, filters.region, search]);
+    }, [policies, closingSoon, selectedCategories, filters.status, filters.region, search]);
 
     return (
         <div className="min-h-screen bg-md-surface">
-            <Header onSearch={setSearch} />
+            <Header onSearch={setSearch} closingSoon={closingSoon} onClosingSoon={() => setClosingSoon(v => !v)} />
             <HeroSection stats={stats} />
             <CategoryGrid selected={selectedCategories} onToggle={toggleCategory} onClear={() => setSelectedCategories([])} />
 

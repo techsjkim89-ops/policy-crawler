@@ -2,10 +2,11 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './LoginModal';
 
-export default function Header({ onSearch }) {
+export default function Header({ onSearch, closingSoon, onClosingSoon }) {
     const { user, logout, loading } = useAuth();
     const [searchOpen, setSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -13,6 +14,8 @@ export default function Header({ onSearch }) {
     const [loginModalOpen, setLoginModalOpen] = useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const pathname = usePathname();
 
     const searchRef = useRef(null);
     const profileRef = useRef(null);
@@ -74,18 +77,36 @@ export default function Header({ onSearch }) {
 
                         {/* Navigation Links (Desktop) */}
                         <nav className="hidden md:flex items-center gap-1 mx-6">
-                            <Link href="/" className="px-4 py-2 text-label-lg text-md-on-surface hover:bg-md-primary/[0.08] rounded-full transition-colors">
+                            <Link href="/" className={`relative px-4 py-2 text-label-lg rounded-full transition-colors ${pathname === '/' ? 'text-md-primary' : 'text-md-on-surface-variant hover:text-md-on-surface hover:bg-md-primary/[0.08]'
+                                }`}>
                                 홈
+                                {pathname === '/' && (
+                                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-[3px] bg-md-primary rounded-full" />
+                                )}
                             </Link>
-                            <Link href="/policies" className="px-4 py-2 text-label-lg text-md-on-surface-variant hover:text-md-on-surface hover:bg-md-primary/[0.08] rounded-full transition-colors">
+                            <Link href="/policies" className={`relative px-4 py-2 text-label-lg rounded-full transition-colors ${pathname === '/policies' ? 'text-md-primary' : 'text-md-on-surface-variant hover:text-md-on-surface hover:bg-md-primary/[0.08]'
+                                }`}>
                                 전체 정책
+                                {pathname === '/policies' && (
+                                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-[3px] bg-md-primary rounded-full" />
+                                )}
                             </Link>
-                            <Link href="#new-policies" className="px-4 py-2 text-label-lg text-md-on-surface-variant hover:text-md-on-surface hover:bg-md-primary/[0.08] rounded-full transition-colors flex items-center gap-1.5">
-                                신규 정책
-                                <span className="w-2 h-2 bg-md-error rounded-full"></span>
-                            </Link>
-                            <Link href="/guide" className="px-4 py-2 text-label-lg text-md-on-surface-variant hover:text-md-on-surface hover:bg-md-primary/[0.08] rounded-full transition-colors">
+                            <button
+                                onClick={() => { onClosingSoon?.(); }}
+                                className={`relative px-4 py-2 text-label-lg rounded-full transition-colors flex items-center gap-1.5 ${closingSoon
+                                        ? 'bg-md-error-container text-md-on-error-container'
+                                        : 'text-md-on-surface-variant hover:text-md-on-surface hover:bg-md-primary/[0.08]'
+                                    }`}
+                            >
+                                ⏰ 마감임박
+                                <span className="w-2 h-2 bg-md-error rounded-full animate-pulse"></span>
+                            </button>
+                            <Link href="/guide" className={`relative px-4 py-2 text-label-lg rounded-full transition-colors ${pathname === '/guide' ? 'text-md-primary' : 'text-md-on-surface-variant hover:text-md-on-surface hover:bg-md-primary/[0.08]'
+                                }`}>
                                 이용안내
+                                {pathname === '/guide' && (
+                                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-[3px] bg-md-primary rounded-full" />
+                                )}
                             </Link>
                         </nav>
 
@@ -210,25 +231,31 @@ export default function Header({ onSearch }) {
                     <div className="md:hidden border-t border-md-outline-variant bg-md-surface-container-low animate-fadeIn">
                         <nav className="max-w-7xl mx-auto px-4 py-2">
                             <Link href="/" onClick={() => setMobileMenuOpen(false)}
-                                className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-md-primary/[0.08] transition-colors">
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${pathname === '/' ? 'bg-md-primary/[0.12] border-l-[3px] border-md-primary' : 'hover:bg-md-primary/[0.08]'
+                                    }`}>
                                 <span>🏠</span>
-                                <span className="text-body-lg text-md-on-surface">홈</span>
+                                <span className={`text-body-lg ${pathname === '/' ? 'text-md-primary font-medium' : 'text-md-on-surface'}`}>홈</span>
                             </Link>
                             <Link href="/policies" onClick={() => setMobileMenuOpen(false)}
-                                className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-md-primary/[0.08] transition-colors">
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${pathname === '/policies' ? 'bg-md-primary/[0.12] border-l-[3px] border-md-primary' : 'hover:bg-md-primary/[0.08]'
+                                    }`}>
                                 <span>📋</span>
-                                <span className="text-body-lg text-md-on-surface">전체 정책</span>
+                                <span className={`text-body-lg ${pathname === '/policies' ? 'text-md-primary font-medium' : 'text-md-on-surface'}`}>전체 정책</span>
                             </Link>
-                            <Link href="#new-policies" onClick={() => setMobileMenuOpen(false)}
-                                className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-md-primary/[0.08] transition-colors">
-                                <span>🆕</span>
-                                <span className="text-body-lg text-md-on-surface">신규 정책</span>
-                                <span className="w-2 h-2 bg-md-error rounded-full"></span>
-                            </Link>
+                            <button onClick={() => { onClosingSoon?.(); setMobileMenuOpen(false); }}
+                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${closingSoon
+                                    ? 'bg-md-error-container text-md-on-error-container'
+                                    : 'hover:bg-md-primary/[0.08]'
+                                    }`}>
+                                <span>⏰</span>
+                                <span className="text-body-lg">마감임박</span>
+                                <span className="w-2 h-2 bg-md-error rounded-full animate-pulse"></span>
+                            </button>
                             <Link href="/guide" onClick={() => setMobileMenuOpen(false)}
-                                className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-md-primary/[0.08] transition-colors">
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${pathname === '/guide' ? 'bg-md-primary/[0.12] border-l-[3px] border-md-primary' : 'hover:bg-md-primary/[0.08]'
+                                    }`}>
                                 <span>📖</span>
-                                <span className="text-body-lg text-md-on-surface">이용안내</span>
+                                <span className={`text-body-lg ${pathname === '/guide' ? 'text-md-primary font-medium' : 'text-md-on-surface'}`}>이용안내</span>
                             </Link>
                         </nav>
                     </div>
